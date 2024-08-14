@@ -4,24 +4,20 @@ const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const cors = require('cors')
 
-
-const app = express()
-const port=3001;
-
-
+const app = express();
+const port = 3001;
 
 app.use(bodyParser.json());
-app.use(cors())
+app.use(cors());
 
-//set up mail transporter
-
+// Set up mail transporter
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587, // or 465 for SSL
-    secure: false, // true for 465, false for other ports
+    port: 587,
+    secure: false,
     auth: {
-        user:'soumikdhar0584@gmail.com',
-        pass:'Science@123'
+        user: process.env.EMAIL_USER,
+        pass: 'rwbl cmph rufa uhxd'
     },
     tls: {
         rejectUnauthorized: false
@@ -36,32 +32,28 @@ transporter.verify((error, success) => {
     }
 });
 
-
-console.log('checking process env',process.env.EMAIL_USER )
-app.post('/send',(req,resp)=>{
-    const {uname,uemail,umessage} = req.body;
-    console.log('insinde', uname,uemail,umessage)
-    if(!uname || !uemail || !umessage){
-        return resp.status(400).json({error:'All fields are required'});
+app.post('/send', (req, resp) => {
+    const { uname, uemail, umessage } = req.body;
+    if (!uname || !uemail || !umessage) {
+        return resp.status(400).json({ error: 'All fields are required' });
     }
 
     const mailOption = {
-        from:uemail,
-        to:'soumikdhar0584@gmail.com',
-        subject:'New message from contact',
-        text:`Name : ${uname} \nEmail: ${uemail}\nMessage:${umessage}`,
+        from: process.env.EMAIL_USER,
+        to: 'soumikdhar0584@gmail.com',
+        subject: 'New message from contact',
+        text: `Name : ${uname} \nEmail: ${uemail}\nMessage:${umessage}`,
     };
 
-    transporter.sendMail(mailOption,(error,info)=>{
-        if(error){
-            console.log('checking error', error, info)
-            return resp.status(500).json({error:'Failed to send mail'})
-            
+    transporter.sendMail(mailOption, (error, info) => {
+        if (error) {
+            console.log('Checking error', error, info);
+            return resp.status(500).json({ error: 'Failed to send mail' });
         }
-        resp.status(200).json({message:'Email sent successfully'})
+        resp.status(200).json({ message: 'Email sent successfully' });
     });
 });
 
-app.listen(port,()=>{
-    console.log(`Server running at localhost : ${port}`)
-})
+app.listen(port, () => {
+    console.log(`Server running at localhost : ${port}`);
+});
